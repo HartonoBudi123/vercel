@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 
 interface Post {
@@ -10,7 +10,7 @@ interface Post {
   createdAt: string;
 }
 
-export default function PostDetail() {
+function PostDetailContent() {
   const { id } = useParams();
   const router = useRouter();
   const [post, setPost] = useState<Post | null>(null);
@@ -20,6 +20,7 @@ export default function PostDetail() {
   const [content, setContent] = useState('');
 
   useEffect(() => {
+    if (!id) return;
     fetch(`/api/posts/${id}`).then(async (res) => {
       if (res.status === 404) router.push('/not-found');
       else {
@@ -113,5 +114,13 @@ export default function PostDetail() {
         </>
       )}
     </main>
+  );
+}
+
+export default function PostDetail() {
+  return (
+    <Suspense fallback={<p className="container mt-4">Loading...</p>}>
+      <PostDetailContent />
+    </Suspense>
   );
 }
