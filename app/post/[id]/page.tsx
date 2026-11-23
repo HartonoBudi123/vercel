@@ -3,10 +3,17 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 
+interface Post {
+  id?: number;
+  title: string;
+  content: string;
+  createdAt: string;
+}
+
 export default function PostDetail() {
   const { id } = useParams();
   const router = useRouter();
-  const [post, setPost] = useState<unknown>(null);
+  const [post, setPost] = useState<Post | null>(null);
 
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState('');
@@ -16,7 +23,7 @@ export default function PostDetail() {
     fetch(`/api/posts/${id}`).then(async (res) => {
       if (res.status === 404) router.push('/not-found');
       else {
-        const data = await res.json();
+        const data: Post = await res.json();
         setPost(data);
         setTitle(data.title);
         setContent(data.content);
@@ -39,10 +46,7 @@ export default function PostDetail() {
       body: JSON.stringify({ title, content }),
     });
 
-    // Perbarui tampilan di halaman ini dan keluar dari mode edit
-    setPost((prev) =>
-      prev ? { ...(prev as object), title, content } : prev
-    );
+    setPost((prev) => (prev ? { ...prev, title, content } : prev));
     setIsEditing(false);
     router.refresh();
   };
@@ -85,8 +89,8 @@ export default function PostDetail() {
             type="button"
             onClick={() => {
               setIsEditing(false);
-              setTitle((post as { title: string }).title);
-              setContent((post as { content: string }).content);
+              setTitle(post.title);
+              setContent(post.content);
             }}
             className="btn btn-secondary"
           >
@@ -95,11 +99,11 @@ export default function PostDetail() {
         </form>
       ) : (
         <>
-          <h1>{(post as { title: string }).title}</h1>
+          <h1>{post.title}</h1>
           <p className="text-muted">
-            {new Date((post as { createdAt: string }).createdAt).toLocaleDateString('id-ID')}
+            {new Date(post.createdAt).toLocaleDateString('id-ID')}
           </p>
-          <p>{(post as { content: string }).content}</p>
+          <p>{post.content}</p>
           <button onClick={handleDelete} className="btn btn-danger me-2">
             Delete
           </button>
