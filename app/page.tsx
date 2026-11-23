@@ -1,37 +1,45 @@
+import { Suspense } from 'react';
+import { connection } from 'next/server';
 import Link from 'next/link';
+import { db } from '@/db';
+import { posts } from '@/db/schema';
 
 async function getPosts() {
-  const res = await fetch('http://localhost:3000/api/posts', {
-    cache: 'no-store',
-  });
-  return res.json();
+  await connection();
+  return db.select().from(posts);
 }
 
-export default async function Home() {
-  const posts = await getPosts();
+async function PostList() {
+  const allPosts = await getPosts();
 
+  return allPosts.length === 0 ? (
+    <p>No posts yet.</p>
+  ) : (
+    <ul className="list-group">
+      {allPosts.map((post) => (
+        <li key={post.id} className="list-group-item">
+          <Link href={`/post/${post.id}`}>
+            {post.title}
+          </Link>
+          <span className="text-muted float-end">
+            {post.createdAt && new Date(post.createdAt).toLocaleDateString('id-ID')}
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+export default function Home() {
   return (
     <main className="container mt-4">
       <h1>Blog Posts</h1>
       <Link href="/create" className="btn btn-primary mb-3">
         Create Post
       </Link>
-      {posts.length === 0 ? (
-        <p>No posts yet.</p>
-      ) : (
-        <ul className="list-group">
-          {posts.map((post: unknown) => (
-            <li key={(post as { id: string }).id} className="list-group-item">
-              <Link href={`/post/${(post as { id: string }).id}`}>
-                {(post as { title: string }).title}
-              </Link>
-              <span className="text-muted float-end">
-                {new Date((post as { createdAt: string }).createdAt).toLocaleDateString('id-ID')}
-              </span>
-            </li>
-          ))}
-        </ul>
-      )}
+      <Suspense fallback={<p>Loading...</p>}>
+        <PostList />
+      </Suspense>
     </main>
   );
 }

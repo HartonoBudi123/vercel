@@ -33,14 +33,12 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const body = await req.json();
+  const { title, content } = await req.json();
 
-  await db.update(posts)
-    .set({
-      title: body.title,
-      content: body.content,
-    })
+  await db
+    .update(posts)
+    .set({ title, content })
     .where(eq(posts.id, Number(id)));
 
-  return NextResponse.json({ message: "Updated successfully" });
+  return NextResponse.json({ message: 'Updated' }, { status: 200 });
 }
