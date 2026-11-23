@@ -1,0 +1,20 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1794799626715,
+      "tag": "0000_chief_purifiers",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1794801091991,
+      "tag": "0001_crazy_wilson_fisk",
+      "breakpoints": true
+    }
+  ]
+}
